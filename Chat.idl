@@ -1,0 +1,8 @@
+module ChatApp {
+   interface ChatCallback {
+      void callback(in string message);
+   };
+   interface Chat {
+      string say(in ChatCallback objref, in string message);
+   };
+};
