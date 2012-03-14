@@ -4,6 +4,7 @@ import org.omg.CosNaming.NamingContextPackage.*;
 import org.omg.CORBA.*;     // All CORBA applications need these classes.
 import org.omg.PortableServer.*;   
 import org.omg.PortableServer.POA;
+import java.io.*;
 
  
 class ChatCallbackImpl extends ChatCallbackPOA
@@ -54,8 +55,21 @@ public class ChatClient
 	    ChatCallback cref = ChatCallbackHelper.narrow(ref);
 	    
 	    // Application code goes below
-	    String chat = chatImpl.say(cref, "\n  Hello....");
-	    System.out.println(chat);
+            while (true) {
+              BufferedReader stdin = new BufferedReader
+                (new InputStreamReader (System.in));
+              
+              String msg = stdin.readLine();
+              String cmd = msg.split(" ")[0];
+              String newmsg[] = msg.split(" ");
+              newmsg[0] = "";
+
+              //System.out.println(cmd.equals("join"));
+              String derp = "FAIL :((";
+              if (cmd.equals("join")) {
+                derp = chatImpl.join(cref, newmsg[1]);
+              }
+            }
 	    
 	} catch(Exception e){
 	    System.out.println("ERROR : " + e);

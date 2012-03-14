@@ -7,64 +7,70 @@ import org.omg.PortableServer.POA;
  
 class ChatImpl extends ChatPOA
 {
-    private ORB orb;
+  private ORB orb;
 
-    public void setORB(ORB orb_val) {
-        orb = orb_val;
-    }
-
-    public String say(ChatCallback callobj, String msg)
-    {
-        callobj.callback(msg);
-        return ("         ....Goodbye!\n");
-    }
+  public void setORB(ORB orb_val) {
+    orb = orb_val;
+  }
+  
+  public String say(ChatCallback callobj, String msg)
+  {
+    callobj.callback(msg);
+    return ("");
+  }
+  public String join(ChatCallback callobj, String user)
+  {
+    callobj.callback(user + " joined the chat!");
+    
+    return("You are user: " + user);
+  }
 }
 
-public class ChatServer 
-{
+  public class ChatServer 
+  {
     public static void main(String args[]) 
     {
-	try { 
-	    // create and initialize the ORB
-	    ORB orb = ORB.init(args, null); 
+      try { 
+        // create and initialize the ORB
+        ORB orb = ORB.init(args, null); 
 
-	    // create servant (impl) and register it with the ORB
-	    ChatImpl chatImpl = new ChatImpl();
-	    chatImpl.setORB(orb); 
+        // create servant (impl) and register it with the ORB
+        ChatImpl chatImpl = new ChatImpl();
+        chatImpl.setORB(orb); 
 
-	    // get reference to rootpoa & activate the POAManager
-	    POA rootpoa = 
-		POAHelper.narrow(orb.resolve_initial_references("RootPOA"));  
-	    rootpoa.the_POAManager().activate(); 
+        // get reference to rootpoa & activate the POAManager
+        POA rootpoa = 
+          POAHelper.narrow(orb.resolve_initial_references("RootPOA"));  
+        rootpoa.the_POAManager().activate(); 
 
-	    // get the root naming context
-	    org.omg.CORBA.Object objRef = 
-		           orb.resolve_initial_references("NameService");
-	    NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+        // get the root naming context
+        org.omg.CORBA.Object objRef = 
+          orb.resolve_initial_references("NameService");
+        NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
 
-	    // obtain object reference from the servant (impl)
-	    org.omg.CORBA.Object ref = 
-		rootpoa.servant_to_reference(chatImpl);
-	    Chat cref = ChatHelper.narrow(ref);
+        // obtain object reference from the servant (impl)
+        org.omg.CORBA.Object ref = 
+          rootpoa.servant_to_reference(chatImpl);
+        Chat cref = ChatHelper.narrow(ref);
 
-	    // bind the object reference in naming
-	    String name = "Chat";
-	    NameComponent path[] = ncRef.to_name(name);
-	    ncRef.rebind(path, cref);
+        // bind the object reference in naming
+        String name = "Chat";
+        NameComponent path[] = ncRef.to_name(name);
+        ncRef.rebind(path, cref);
 
-	    // Application code goes below
-	    System.out.println("ChatServer ready and waiting ...");
+        // Application code goes below
+        System.out.println("ChatServer ready and waiting ...");
 	    
-	    // wait for invocations from clients
-	    orb.run();
-	}
+        // wait for invocations from clients
+        orb.run();
+      }
 	    
-	catch(Exception e) {
-	    System.err.println("ERROR : " + e);
-	    e.printStackTrace(System.out);
-	}
+      catch(Exception e) {
+        System.err.println("ERROR : " + e);
+        e.printStackTrace(System.out);
+      }
 
-	System.out.println("ChatServer Exiting ...");
+      System.out.println("ChatServer Exiting ...");
     }
 
-}
+  }
