@@ -55,6 +55,7 @@ public class ChatClient
 	    ChatCallback cref = ChatCallbackHelper.narrow(ref);
 	    
 	    // Application code goes below
+            String usr = "";
             while (true) {
               BufferedReader stdin = new BufferedReader
                 (new InputStreamReader (System.in));
@@ -63,11 +64,36 @@ public class ChatClient
               String cmd = msg.split(" ")[0];
               String newmsg[] = msg.split(" ");
               newmsg[0] = "";
-
+              String message = "";
+              for(int i = 1; i < newmsg.length - 1; i++) {
+                message += (newmsg[i] + " ");
+                //System.out.println(newmsg[i]);
+              }
+              message += newmsg[newmsg.length - 1];
+              
               //System.out.println(cmd.equals("join"));
-              String derp = "FAIL :((";
-              if (cmd.equals("join")) {
-                derp = chatImpl.join(cref, newmsg[1]);
+              if(cmd.equals("join")) {
+                if(usr == "") {
+                  usr = (chatImpl.join(cref, newmsg[1]));
+                  if(usr.equals("")) {
+                    System.out.println("Username in use!");
+                  }
+                  else {
+                    System.out.println("Welcome " + usr);
+                  }
+                }
+                else {
+                  System.out.println("You are already joined");
+                }
+              }
+              else if(cmd.equals("post")) {
+                if(usr != "")
+                  chatImpl.say(cref, message, usr);
+                else
+                  System.out.println("You have to join before you can chat");
+              }
+              else if(cmd.equals("list")) {
+                System.out.println(chatImpl.list());
               }
             }
 	    

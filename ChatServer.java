@@ -4,25 +4,47 @@ import org.omg.CosNaming.NamingContextPackage.*; // ..for exceptions.
 import org.omg.CORBA.*;     // All CORBA applications need these classes. 
 import org.omg.PortableServer.*;   
 import org.omg.PortableServer.POA;
+import java.util.*;
  
 class ChatImpl extends ChatPOA
 {
   private ORB orb;
-
+  private ArrayList userlist = new ArrayList();
+  private ChatCallback[] objlist = new ChatCallback[34];
+  private int objindex = 0;
+  
   public void setORB(ORB orb_val) {
     orb = orb_val;
   }
   
-  public String say(ChatCallback callobj, String msg)
+  public void say(ChatCallback callobj, String msg, String usr)
   {
-    callobj.callback(msg);
-    return ("");
+    for(int i = 0; i < objindex; i++) {
+      objlist[i].callback(usr + " says: " + msg);
+    }
   }
   public String join(ChatCallback callobj, String user)
   {
-    callobj.callback(user + " joined the chat!");
-    
-    return("You are user: " + user);
+    for(int i = 0; i < userlist.size(); i++) {
+      if(user.equals(userlist.get(i))) {
+        return("");
+      }
+    }
+    for(int i = 0; i < objindex; i++) {
+      objlist[i].callback("* " + user + " joined the chat.");
+    }
+    userlist.add(user);
+    objlist[objindex] = callobj;
+    objindex += 1;
+    return(user);
+    //System.out.println("Content = " + userlist);
+  }
+  public String list() {
+    String users = "List of registered users:\n";
+    for(int i = 0; i < userlist.size(); i++) {
+      users += (userlist.get(i) + "\n");
+    }
+    return users;
   }
 }
 
@@ -60,7 +82,7 @@ class ChatImpl extends ChatPOA
 
         // Application code goes below
         System.out.println("ChatServer ready and waiting ...");
-	    
+	
         // wait for invocations from clients
         orb.run();
       }

@@ -3,7 +3,13 @@ module ChatApp {
     void callback(in string message);
   };
   interface Chat {
+    // Join
     string join(in ChatCallback objref, in string user);
-    string say(in ChatCallback objref, in string message);
+    // Post
+    void say(in ChatCallback objref, in string message, in string user);
+    // List
+    string list();
+    // Leave
+    // Quit
   };
 };
