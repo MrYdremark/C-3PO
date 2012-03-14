@@ -40,11 +40,32 @@ class ChatImpl extends ChatPOA
     //System.out.println("Content = " + userlist);
   }
   public String list() {
-    String users = "List of registered users:\n";
-    for(int i = 0; i < userlist.size(); i++) {
-      users += (userlist.get(i) + "\n");
-    }
+    if(userlist.size() != 0) {
+      String users = "* List of registered users:\n";
+      for(int i = 0; i < userlist.size()-1; i++) {
+        users += (userlist.get(i) + "\n");
+      }
+      users += (userlist.get(userlist.size()-1));
     return users;
+    }
+    else {
+      return "* No users active";
+    }
+  }
+  // Under progress
+  public void leave(String user) {
+    for(int i = 0; i < userlist.size(); i++) {
+      if(user.equals(userlist.get(i))) {
+        userlist.remove(i);
+        List<ChatCallback> list = new ArrayList<ChatCallback>(Arrays.asList(objlist));
+        list.remove(objlist[i]);
+        objlist = list.toArray(new ChatCallback[34]);
+        objindex--;
+      }
+    }
+    for(int i = 0; i < objindex; i++) {
+      objlist[i].callback("* " + user + " left");
+    }
   }
 }
 

@@ -90,13 +90,41 @@ public class ChatClient
                 if(usr != "")
                   chatImpl.say(cref, message, usr);
                 else
-                  System.out.println("You have to join before you can chat");
+                  System.out.println("* You have to join before you can chat");
               }
               else if(cmd.equals("list")) {
                 System.out.println(chatImpl.list());
               }
+              else if(cmd.equals("leave")) {
+                if(usr.equals("")) {
+                  System.out.println("* You have to join before you can leave");
+                }
+                else {
+                  chatImpl.leave(usr);
+                  usr = "";
+                }
+              }
+              else if(cmd.equals("help")) {
+                System.out.println("");
+                System.out.println("C-3PO Usage");
+                System.out.println("");
+                System.out.println("join + \"username\" = join a chat");
+                System.out.println("list = list active chatters");
+                System.out.println("post + \"your_message\" = post message");
+                System.out.println("leave = leave chat");
+                System.out.println("quit = kill client");
+              }
+              else if(cmd.equals("quit")) {
+                if(usr != "") {
+                  chatImpl.leave(usr);
+                }
+                break;
+              }
+              else {
+                System.out.println("* Unknown command. Type \"help\" for usage info");
+              }
             }
-	    
+              
 	} catch(Exception e){
 	    System.out.println("ERROR : " + e);
 	    e.printStackTrace(System.out);
