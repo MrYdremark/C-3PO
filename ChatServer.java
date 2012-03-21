@@ -9,9 +9,13 @@ import java.util.*;
 class ChatImpl extends ChatPOA
 {
   private ORB orb;
+  private Othello oth = new Othello();
   private ArrayList userlist = new ArrayList();
   private ChatCallback[] objlist = new ChatCallback[34];
+  private ChatCallback[] othlist = new ChatCallback[34];
+  private HashMap<String,String> usercolor = new HashMap<String,String>();
   private int objindex = 0;
+  private int othindex = 0;
   
   public void setORB(ORB orb_val) {
     orb = orb_val;
@@ -46,13 +50,12 @@ class ChatImpl extends ChatPOA
         users += (userlist.get(i) + "\n");
       }
       users += (userlist.get(userlist.size()-1));
-    return users;
+      return users;
     }
     else {
       return "* No users active";
     }
   }
-  // Under progress
   public void leave(String user) {
     for(int i = 0; i < userlist.size(); i++) {
       if(user.equals(userlist.get(i))) {
@@ -67,53 +70,103 @@ class ChatImpl extends ChatPOA
       objlist[i].callback("* " + user + " left");
     }
   }
+  public void othello(ChatCallback callobj, String color, String user) {
+    othlist[othindex] = callobj;
+    othindex += 1;
+    usercolor.put(user, color);
+    print(callobj, user);
+    // Show active users that client is playing Othello
+    for(int i = 0; i < objindex; i++) {
+      objlist[i].callback("* " + user + " is now playing Othello.");
+    }
+  }
+  public void move(String move, String user) {
+    if(oth.makeMove(move, usercolor.get(user))) {
+      print(null, "");
+    }
+    else {
+      for(int i = 0; i < othindex; i++) {
+        othlist[i].callback("* " + user + " Could not make a valid move.");
+      }
+    }
+  }
+  public void print(ChatCallback callobj, String arg) {
+    String print = "";
+    HashMap<String,String[]> board = oth.giveme();
+    print += "    1   2   3   4   5   6   7   8\n";
+    print += "  ---------------------------------";
+    for(int i = 0; i < 8; i++) {
+      char letter = (char)(65+i);
+      String[] a = board.get(Character.toString(letter));
+      print += "\n" + Character.toString(letter) + " |";
+      for(int j = 0; j < 8; j++) {
+        if(a[j] == null) {
+          print += "   |";
+        }
+        else {
+          print += " " + a[j] + " |";
+        }
+      }
+      print += "\n  ---------------------------------"; 
+    }
+    if(arg.equals("")) {
+      for(int i = 0; i < othindex; i++) {
+        othlist[i].callback(print);
+      }
+    }
+    else {
+      callobj.callback(print);
+    }
+  }
 }
 
-  public class ChatServer 
+
+
+public class ChatServer 
+{
+  public static void main(String args[]) 
   {
-    public static void main(String args[]) 
-    {
-      try { 
-        // create and initialize the ORB
-        ORB orb = ORB.init(args, null); 
+    try { 
+      // create and initialize the ORB
+      ORB orb = ORB.init(args, null); 
 
-        // create servant (impl) and register it with the ORB
-        ChatImpl chatImpl = new ChatImpl();
-        chatImpl.setORB(orb); 
+      // create servant (impl) and register it with the ORB
+      ChatImpl chatImpl = new ChatImpl();
+      chatImpl.setORB(orb); 
 
-        // get reference to rootpoa & activate the POAManager
-        POA rootpoa = 
-          POAHelper.narrow(orb.resolve_initial_references("RootPOA"));  
-        rootpoa.the_POAManager().activate(); 
+      // get reference to rootpoa & activate the POAManager
+      POA rootpoa = 
+        POAHelper.narrow(orb.resolve_initial_references("RootPOA"));  
+      rootpoa.the_POAManager().activate(); 
 
-        // get the root naming context
-        org.omg.CORBA.Object objRef = 
-          orb.resolve_initial_references("NameService");
-        NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+      // get the root naming context
+      org.omg.CORBA.Object objRef = 
+        orb.resolve_initial_references("NameService");
+      NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
 
-        // obtain object reference from the servant (impl)
-        org.omg.CORBA.Object ref = 
-          rootpoa.servant_to_reference(chatImpl);
-        Chat cref = ChatHelper.narrow(ref);
+      // obtain object reference from the servant (impl)
+      org.omg.CORBA.Object ref = 
+        rootpoa.servant_to_reference(chatImpl);
+      Chat cref = ChatHelper.narrow(ref);
 
-        // bind the object reference in naming
-        String name = "Chat";
-        NameComponent path[] = ncRef.to_name(name);
-        ncRef.rebind(path, cref);
+      // bind the object reference in naming
+      String name = "Chat";
+      NameComponent path[] = ncRef.to_name(name);
+      ncRef.rebind(path, cref);
 
-        // Application code goes below
-        System.out.println("ChatServer ready and waiting ...");
+      // Application code goes below
+      System.out.println("ChatServer ready and waiting ...");
 	
-        // wait for invocations from clients
-        orb.run();
-      }
+      // wait for invocations from clients
+      orb.run();
+    }
 	    
-      catch(Exception e) {
-        System.err.println("ERROR : " + e);
-        e.printStackTrace(System.out);
-      }
-
-      System.out.println("ChatServer Exiting ...");
+    catch(Exception e) {
+      System.err.println("ERROR : " + e);
+      e.printStackTrace(System.out);
     }
 
+    System.out.println("ChatServer Exiting ...");
   }
+  
+}

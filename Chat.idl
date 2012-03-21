@@ -2,6 +2,7 @@ module ChatApp {
   interface ChatCallback {
     void callback(in string message);
   };
+    
   interface Chat {
     // Join
     string join(in ChatCallback objref, in string user);
@@ -11,6 +12,9 @@ module ChatApp {
     string list();
     // Leave
     void leave(in string user);
-    // Quit
+    // Othello
+    void othello(in ChatCallback objref, in string color, in string user);
+    // Move Othello
+    void move(in string move, in string user);
   };
 };
