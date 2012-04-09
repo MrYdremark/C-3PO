@@ -1,5 +1,0 @@
-public static void main() {
-    int[] dinamma;
-
-    dinamma[0] = 5;
-}
