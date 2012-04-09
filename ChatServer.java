@@ -81,7 +81,11 @@ class ChatImpl extends ChatPOA
     }
   }
   public void move(String move, String user) {
-    if(oth.makeMove(move, usercolor.get(user))) {
+      if(oth.gameOver() != 0) {
+	  System.out.println("Game over!");
+	  return;
+      }
+      if(oth.makeMove(move, usercolor.get(user), true)) {
       print(null, "");
     }
     else {
@@ -109,6 +113,10 @@ class ChatImpl extends ChatPOA
       }
       print += "\n  ---------------------------------"; 
     }
+    if (oth.gameOver() == 1)
+	print += "\n Game over! X won!";
+    else if (oth.gameOver() == 2)
+	print += "\n Game over! O won!";
     if(arg.equals("")) {
       for(int i = 0; i < othindex; i++) {
         othlist[i].callback(print);
